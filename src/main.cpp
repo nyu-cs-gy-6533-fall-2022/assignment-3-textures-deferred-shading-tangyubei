@@ -31,6 +31,9 @@
 BufferObject VBO;
 // VertexBufferObject wrapper
 BufferObject NBO;
+// TextureBufferObject wrapper
+BufferObject TBO;
+
 // VertexBufferObject wrapper
 BufferObject IndexBuffer;
 
@@ -40,7 +43,8 @@ std::vector<glm::vec3> V(3);
 std::vector<glm::vec3> VN(3);
 // Contains the vertex positions
 std::vector<glm::ivec3> T(3);
-
+// Contains the texture positions
+std::vector<glm::vec2> VT(3);
 // Last position of the mouse on click
 double xpos, ypos;
 
@@ -226,11 +230,12 @@ bool loadOFFFile(std::string filename, std::vector<glm::vec3>& vertex, std::vect
     return true;
 }
 
-void sphere(float sphereRadius, int sectorCount, int stackCount, std::vector<glm::vec3>& vertex, std::vector<glm::vec3>& normal, std::vector<glm::ivec3>& tria) {
+void sphere(float sphereRadius, int sectorCount, int stackCount, std::vector<glm::vec3>& vertex, std::vector<glm::vec3>& normal, std::vector<glm::ivec3>& tria, std::vector<glm::vec2>& texture) {
     // init variables
     vertex.resize(0);
     normal.resize(0);
     tria.resize(0);
+    texture.resize(0);
     // temp variables
     glm::vec3 sphereVertexPos;
     float xy;
@@ -254,6 +259,12 @@ void sphere(float sphereRadius, int sectorCount, int stackCount, std::vector<glm
 
             // normalized vertex normal
             normal.push_back(sphereVertexPos / sphereRadius);
+
+            // texture coordinates
+            glm::vec2 texturePos;
+            texturePos.x = atan2(sphereVertexPos.x/sphereRadius, sphereVertexPos.z/sphereRadius) / (2. * M_PI) + 0.5;;
+            texturePos.y = -asin(sphereVertexPos.y/sphereRadius) / M_PI + .5;
+            texture.push_back(texturePos);
         }
     }
 
@@ -416,6 +427,8 @@ int main(void)
     VBO.init();
     // initialize normal array buffer
     NBO.init();
+    // initialize texture array buffer
+    TBO.init();
     // initialize element array buffer
     IndexBuffer.init(GL_ELEMENT_ARRAY_BUFFER);
     // initialize model matrix
@@ -424,14 +437,31 @@ int main(void)
     // 1: generate sphere, 0: load OFF model
 #if 1
     // generate sphere (radius, #sectors, #stacks, vertices, normals, triangle indices)
-    sphere(1.0f, 20, 10, V, VN, T);
+    sphere(1.0f, 36, 18, V, VN, T, VT);
     VBO.update(V);
     NBO.update(VN);
+    TBO.update(VT);
     IndexBuffer.update(T);
 
     // load PPM image file
     ImageRGB image;
     bool imageAvailable = loadPPM(image, "../data/land_shallow_topo_2048.ppm");
+
+    unsigned int texture;
+    glGenTextures(1, &texture);
+    glBindTexture(GL_TEXTURE_2D, texture);
+// set the texture wrapping/filtering options (on the currently bound texture object)
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+// load and generate the texture
+    if (imageAvailable)
+    {
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, image.w, image.h, 0,
+                     GL_RGB, GL_UNSIGNED_BYTE, &image.data[0]);
+        glGenerateMipmap(GL_TEXTURE_2D);
+    }
 
 #else
     // load  OFF file
@@ -499,8 +529,10 @@ int main(void)
     // The vertex shader wants the position of the vertices as an input.
     // The following line connects the VBO we defined above with the position "slot"
     // in the vertex shader
+    glBindTexture(GL_TEXTURE_2D, texture);
     program.bindVertexAttribArray("position", VBO);
     program.bindVertexAttribArray("normal", NBO);
+    program.bindVertexAttribArray("aTexCoord", TBO);
 
     // Register the keyboard callback
     glfwSetKeyCallback(window, key_callback);
@@ -539,6 +571,7 @@ int main(void)
         program.bind();
 
         // Set the uniform values
+        glUniform1i(program.uniform("ourTexture"), 0);
         glUniform3f(program.uniform("triangleColor"), 1.0f, 0.5f, 0.0f);
         glUniform3f(program.uniform("camPos"), cameraPos.x, cameraPos.y, cameraPos.z);
         glUniformMatrix4fv(program.uniform("modelMatrix"), 1, GL_FALSE, glm::value_ptr(modelMatrix));
