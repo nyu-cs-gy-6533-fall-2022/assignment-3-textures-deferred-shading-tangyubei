@@ -14,10 +14,14 @@ uniform vec3 camPos;
 
 uniform sampler2D ourTexture;
 
+#define PI 3.141592653589793238462643383279
+
 void main()
 {
     //vec3 col = color;
-    vec3 tex = texture(ourTexture, TexCoord).rgb;
+    vec2 temp = TexCoord;
+    temp.x =  atan(pos.x/1.0f, pos.z/1.0f) / (2. * PI) + 0.5;
+    vec3 tex = texture(ourTexture, temp).rgb;
     vec3 normal = normalize(n);
     vec3 lightDir = normalize(lightPos - pos);
     vec3 col = clamp( tex * lightParams.x +
@@ -25,6 +29,7 @@ void main()
         vec3(1.0) * pow(max(0.0, dot( normalize(camPos - pos), normalize( reflect(-lightDir, normal)))), lightParams.y),
         0.0, 1.0);
     
-    //outColor = vec4(col, 1.0);
-    outColor = texture(ourTexture, TexCoord);
+    outColor = vec4(col, 1.0);
+    //outColor = texture(ourTexture, TexCoord);
+    //outColor = texture(ourTexture, temp);
 }

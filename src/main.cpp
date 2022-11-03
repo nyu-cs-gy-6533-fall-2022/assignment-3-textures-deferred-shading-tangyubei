@@ -262,7 +262,7 @@ void sphere(float sphereRadius, int sectorCount, int stackCount, std::vector<glm
 
             // texture coordinates
             glm::vec2 texturePos;
-            texturePos.x = atan2(sphereVertexPos.x/sphereRadius, sphereVertexPos.z/sphereRadius) / (2. * M_PI) + 0.5;;
+            texturePos.x = atan2(sphereVertexPos.x/sphereRadius, sphereVertexPos.z/sphereRadius) / (2. * M_PI) + 0.5;
             texturePos.y = -asin(sphereVertexPos.y/sphereRadius) / M_PI + .5;
             texture.push_back(texturePos);
         }
