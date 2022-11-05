@@ -1,6 +1,7 @@
 #version 150 core
 
-out vec4 outColor;
+//out vec3 outColor;
+ out vec4 outColor;
 
 in vec3 n;
 in vec3 color;
@@ -22,14 +23,18 @@ void main()
     vec2 temp = TexCoord;
     temp.x =  atan(pos.x/1.0f, pos.z/1.0f) / (2. * PI) + 0.5;
     vec3 tex = texture(ourTexture, temp).rgb;
-    vec3 normal = normalize(n);
+    vec3 normal = normalize(pos);
     vec3 lightDir = normalize(lightPos - pos);
-    vec3 col = clamp( tex * lightParams.x +
-    tex * max(0.0, dot(normal, lightDir)) +
-        vec3(1.0) * pow(max(0.0, dot( normalize(camPos - pos), normalize( reflect(-lightDir, normal)))), lightParams.y),
-        0.0, 1.0);
-    
-    outColor = vec4(col, 1.0);
+//    vec3 col = clamp( tex * lightParams.x +
+//    tex * max(0.0, dot(normalize(pos/1.0f), lightDir)) +
+//        vec3(1.0) * pow(max(0.0, dot( normalize(camPos - pos), normalize( reflect(-lightDir, normalize(pos/1.0f))))), 50.0f),
+//        0.0, 1.0);
+        vec3 col = clamp( tex * lightParams.x +
+        tex * max(0.0, dot(normal, lightDir)) +
+            vec3(1.0) * pow(max(0.0, dot( normalize(camPos - pos), normalize( reflect(-lightDir, normal)))), 50.0f),
+            0.0, 1.0);
+    outColor = vec4(col,1.0f);
+   //outColor = texture(ourTexture, temp);
     //outColor = texture(ourTexture, TexCoord);
     //outColor = texture(ourTexture, temp);
 }
