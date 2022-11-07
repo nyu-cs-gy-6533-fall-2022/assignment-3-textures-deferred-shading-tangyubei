@@ -42,8 +42,8 @@ void BufferObject::free()
 
 bool Program::init(
   const std::string &vertex_shader_string,
-  const std::string &fragment_shader_string,
-  const std::string &fragment_data_name)
+  const std::string &fragment_shader_string)
+ // const std::string &fragment_data_name)
 {
   using namespace std;
   vertex_shader = create_shader_helper(GL_VERTEX_SHADER, vertex_shader_string);
@@ -57,7 +57,7 @@ bool Program::init(
   glAttachShader(program_shader, vertex_shader);
   glAttachShader(program_shader, fragment_shader);
 
-  glBindFragDataLocation(program_shader, 0, fragment_data_name.c_str());
+  //glBindFragDataLocation(program_shader, 0, fragment_data_name.c_str());
   glLinkProgram(program_shader);
 
   GLint status;
