@@ -445,7 +445,7 @@ int main(void)
     TBO.update(VT);
     IndexBuffer.update(T);
 
- //    load PPM image file
+    //    load PPM image file
     ImageRGB image;
     bool imageAvailable = loadPPM(image, "../data/land_shallow_topo_2048.ppm");
 
@@ -463,7 +463,7 @@ int main(void)
                      GL_RGB, GL_UNSIGNED_BYTE, &image.data[0]);
         glGenerateMipmap(GL_TEXTURE_2D);
     }
-   // glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT3, texture, 0);
+    // glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT3, texture, 0);
     glBindTexture(GL_TEXTURE_2D, texture);
 #else
     // load  OFF file
@@ -534,6 +534,7 @@ int main(void)
     glBindFragDataLocation(	program.program_shader,0,"gPosition");
     glBindFragDataLocation(	program.program_shader,1,"gNormal");
     glBindFragDataLocation(	program.program_shader,2,"gColor");
+    glBindFragDataLocation(	program.program_shader,3,"gDepth");
     program.bind();
 
     // Define some variables out of scope of the switch statement
@@ -541,7 +542,7 @@ int main(void)
     int windowWidth = 1024;
     int windowHeight = 768;
     Program quadProgram;
-    GLuint gPosition, gNormal, gColor;
+    GLuint gPosition, gNormal, gColor, gDepth;
 
     // But on MacOS X with a retina screen it'll be 1024*2 and 768*2, so we get the actual framebuffer size:
     glfwGetFramebufferSize(window, &windowWidth, &windowHeight);
@@ -572,14 +573,24 @@ int main(void)
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
+    glGenTextures(1, &gDepth);
+    glBindTexture(GL_TEXTURE_2D, gDepth);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, windowWidth, windowHeight, 0, GL_RGB, GL_UNSIGNED_BYTE, 0);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+
+
     // Set "renderedTexture" as our colour attachement #0
     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, gPosition, 0);
     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D, gNormal, 0);
     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT2, GL_TEXTURE_2D, gColor, 0);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT3, GL_TEXTURE_2D, gDepth, 0);
 
     // Set the list of draw buffers.
-    GLenum attachments[3] = {GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2};
-    glDrawBuffers(3, attachments); // "1" is the size of DrawBuffers
+    GLenum attachments[4] = {GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2, GL_COLOR_ATTACHMENT3};
+    glDrawBuffers(4, attachments); // "1" is the size of DrawBuffers
 
     // Always check that our framebuffer is ok
     if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
@@ -614,7 +625,7 @@ int main(void)
     glUniform1i(glGetUniformLocation(quadProgram.program_shader, "gPosition"), 2);
     glUniform1i(glGetUniformLocation(quadProgram.program_shader, "gNormal"), 1);
     glUniform1i(glGetUniformLocation(quadProgram.program_shader, "gColor"), 0);
-
+    glUniform1i(glGetUniformLocation(quadProgram.program_shader, "gDepth"), 3);
 
     // Register the keyboard callbackx
     glfwSetKeyCallback(window, key_callback);
@@ -648,7 +659,8 @@ int main(void)
 
         // Render to the framebuffer with texture attached
         glBindFramebuffer(GL_FRAMEBUFFER, FramebufferName);
-        glViewport(0,0,windowWidth,windowHeight); // Render on the whole framebuffer, complete from the lower left corner to the upper right
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+   //     glViewport(0,0,windowWidth,windowHeight); // Render on the whole framebuffer, complete from the lower left corner to the upper right
 
         // matrix calculations
         viewMatrix = glm::lookAt(cameraPos, cameraTarget, cameraUp);
@@ -672,15 +684,10 @@ int main(void)
         program.bindVertexAttribArray("normal", NBO);
         program.bindVertexAttribArray("aTexCoord", TBO);
         glUniform1i(program.uniform("ourTexture"), 0);
-        glUniform3f(program.uniform("triangleColor"), 1.0f, 0.5f, 0.0f);
-        glUniform3f(program.uniform("camPos"), cameraPos.x, cameraPos.y, cameraPos.z);
         glUniformMatrix4fv(program.uniform("modelMatrix"), 1, GL_FALSE, glm::value_ptr(modelMatrix));
         glUniformMatrix4fv(program.uniform("viewMatrix"), 1, GL_FALSE, glm::value_ptr(viewMatrix));
         glUniformMatrix4fv(program.uniform("projMatrix"), 1, GL_FALSE, glm::value_ptr(projMatrix));
-        // direction towards the light
-        glUniform3fv(program.uniform("lightPos"), 1, glm::value_ptr(glm::vec3(-1.0f, 2.0f, 3.0f)));
-        // x: ambient;
-        glUniform3f(program.uniform("lightParams"), 0.1f, 50.0f, 0.0f);
+
 
         // Clear the framebuffer
         glClearColor(0.5f, 0.5f, 0.5f, 1.0f);
@@ -688,17 +695,18 @@ int main(void)
 
         // Enable depth test
         glEnable(GL_DEPTH_TEST);
+        glEnable(GL_CULL_FACE);
+//        glCullFace(GL_BACK);
 
         // Draw globe
         //glDrawArrays(GL_TRIANGLES, 0, V.size());
         glDrawElements(GL_TRIANGLES, T.size() * 3, GL_UNSIGNED_INT, 0);
-        // Uncomment for wireframe
-        //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
         // Render to the screen
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
         // Render on the whole framebuffer, complete from the lower left corner to the upper right
-        glViewport(0,0,windowWidth,windowHeight);
+      //  glViewport(0,0,windowWidth,windowHeight);
+
 
         // Clear the screen
         glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -708,22 +716,24 @@ int main(void)
 
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, gPosition);
-        //glUniform1i(program.uniform("gPosition"), 0);
 
         glActiveTexture(GL_TEXTURE1);
         glBindTexture(GL_TEXTURE_2D, gNormal);
-        //glUniform1i(program.uniform("gNormal"), 0);
 
         glActiveTexture(GL_TEXTURE2);
         glBindTexture(GL_TEXTURE_2D, gColor);
-        //glUniform1i(program.uniform("gColor"), 0);
+
+        glActiveTexture(GL_TEXTURE3);
+        glBindTexture(GL_TEXTURE_2D, gDepth);
+
+        glUniform3f(quadProgram.uniform("camPos"), cameraPos.x, cameraPos.y, cameraPos.z);
+        // direction towards the light
+        glUniform3fv(quadProgram.uniform("lightPos"), 1, glm::value_ptr(glm::vec3(-1.0f, 2.0f, 3.0f)));
+        // x: ambient;
+        glUniform3f(quadProgram.uniform("lightParams"), 0.1f, 50.0f, 0.0f);
 
         // Draw quads, 6 vertices for 2 triangles
         glDrawArrays(GL_TRIANGLES, 0, 6);
-
-        // Enable depth test
-        glEnable(GL_DEPTH_TEST);
-        glDepthFunc(GL_LESS);
 
         // Swap front and back buffers
         glfwSwapBuffers(window);
