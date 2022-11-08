@@ -20,3 +20,8 @@ Below is the position mapping, texture mapping, and depth mapping. Position and 
 <img width="796" alt="Screen Shot 2022-11-07 at 3 21 40 PM" src="https://user-images.githubusercontent.com/34821850/200407764-17f274a1-5218-42d2-89c0-90106ddd006a.png">
 <img width="801" alt="Screen Shot 2022-11-07 at 3 22 00 PM" src="https://user-images.githubusercontent.com/34821850/200407773-ce6f149b-9f3f-42f1-96a3-cef39321ec35.png">
 <img width="798" alt="Screen Shot 2022-11-07 at 3 21 23 PM" src="https://user-images.githubusercontent.com/34821850/200407785-9fbac498-694d-4f27-bd64-b0d979cc09c1.png">
+
+## Task 4
+I used a Sobel filter to detect edges and output a line if the result of the convolution was over a certain threshold. Below is the dragon outlined in cyan.
+
+<img width="797" alt="Screen Shot 2022-11-08 at 6 44 10 PM" src="https://user-images.githubusercontent.com/34821850/200700431-2cbe8082-9dd9-40d4-810f-441fe9fee97e.png">
