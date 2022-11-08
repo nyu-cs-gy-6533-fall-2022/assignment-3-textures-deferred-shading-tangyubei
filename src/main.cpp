@@ -435,9 +435,8 @@ int main(void)
     // initialize model matrix
     glm::mat4 modelMatrix = glm::mat4(1.0f);
 
-    unsigned int texture;
     // 1: generate sphere, 0: load OFF model
-#if 1
+#if 0
     // generate sphere (radius, #sectors, #stacks, vertices, normals, triangle indices, texture coordinates)
     sphere(1.0f, 36, 18, V, VN, T, VT);
     VBO.update(V);
@@ -449,6 +448,7 @@ int main(void)
     ImageRGB image;
     bool imageAvailable = loadPPM(image, "../data/land_shallow_topo_2048.ppm");
 
+     unsigned int texture;
     glGenTextures(1, &texture);
     glBindTexture(GL_TEXTURE_2D, texture);
 // set the texture wrapping/filtering options (on the currently bound texture object)
@@ -470,7 +470,7 @@ int main(void)
     glm::vec3 min, max, tmpVec;
     std::cout << "Loading OFF file...";
     loadOFFFile("../data/stanford_dragon2.off", V, T, min, max);
-    //loadOFFFile("../data/bunny.off", V, T, min, max);
+   // loadOFFFile("../data/bunny.off", V, T, min, max);
     std::cout << " done! " << V.size() << " vertices, " << T.size() << " triangles" << std::endl;
     VBO.update(V);
     IndexBuffer.update(T);
@@ -507,7 +507,7 @@ int main(void)
     std::cout << " done!" << std::endl;
     // initialize normal array buffer
     NBO.init();
-   NBO.update(VN);
+    NBO.update(VN);
 #endif
 
     // Initialize the OpenGL Program
@@ -567,7 +567,7 @@ int main(void)
 
     glGenTextures(1, &gColor);
     glBindTexture(GL_TEXTURE_2D, gColor);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, windowWidth, windowHeight, 0, GL_RGB, GL_UNSIGNED_BYTE, 0);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, windowWidth, windowHeight, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
@@ -575,7 +575,7 @@ int main(void)
 
     glGenTextures(1, &gDepth);
     glBindTexture(GL_TEXTURE_2D, gDepth);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, windowWidth, windowHeight, 0, GL_RGB, GL_UNSIGNED_BYTE, 0);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, windowWidth, windowHeight, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
@@ -592,9 +592,16 @@ int main(void)
     GLenum attachments[4] = {GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2, GL_COLOR_ATTACHMENT3};
     glDrawBuffers(4, attachments); // "1" is the size of DrawBuffers
 
-    // Always check that our framebuffer is ok
+    // create and attach depth buffer (renderbuffer)
+    unsigned int rboDepth;
+    glGenRenderbuffers(1, &rboDepth);
+    glBindRenderbuffer(GL_RENDERBUFFER, rboDepth);
+    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, windowWidth, windowHeight);
+    glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, rboDepth);
+    // finally check if framebuffer is complete
     if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
-        return false;
+        std::cout << "Framebuffer not complete!" << std::endl;
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
     std::vector<glm::vec3> quad_buffer_data;
     quad_buffer_data.resize(0);
@@ -622,8 +629,10 @@ int main(void)
 
     quadProgram.bind();
 
-    glUniform1i(glGetUniformLocation(quadProgram.program_shader, "gPosition"), 2);
-    glUniform1i(glGetUniformLocation(quadProgram.program_shader, "gNormal"), 1);
+    // For sphere, change position to 2,1 for rabbit change to 1,2
+    // float vs integer
+    glUniform1i(glGetUniformLocation(quadProgram.program_shader, "gPosition"), 1);
+    glUniform1i(glGetUniformLocation(quadProgram.program_shader, "gNormal"), 2);
     glUniform1i(glGetUniformLocation(quadProgram.program_shader, "gColor"), 0);
     glUniform1i(glGetUniformLocation(quadProgram.program_shader, "gDepth"), 3);
 
@@ -653,14 +662,13 @@ int main(void)
 
         // render
         // ------
-        glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+        glClearColor(0.5f, 0.5f, 0.5f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
 
         // Render to the framebuffer with texture attached
         glBindFramebuffer(GL_FRAMEBUFFER, FramebufferName);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-   //     glViewport(0,0,windowWidth,windowHeight); // Render on the whole framebuffer, complete from the lower left corner to the upper right
+        //     glViewport(0,0,windowWidth,windowHeight); // Render on the whole framebuffer, complete from the lower left corner to the upper right
 
         // matrix calculations
         viewMatrix = glm::lookAt(cameraPos, cameraTarget, cameraUp);
@@ -678,25 +686,21 @@ int main(void)
         // Set the uniform values
         // Set active texture to map
 //
-        glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_2D, texture);
+//        glActiveTexture(GL_TEXTURE0);
+//        glBindTexture(GL_TEXTURE_2D, texture);
         program.bindVertexAttribArray("position", VBO);
         program.bindVertexAttribArray("normal", NBO);
-        program.bindVertexAttribArray("aTexCoord", TBO);
-        glUniform1i(program.uniform("ourTexture"), 0);
+        //  program.bindVertexAttribArray("aTexCoord", TBO);
+//        glUniform1i(program.uniform("ourTexture"), 0);
+        glUniform3f(program.uniform("triangleColor"), 1.0f, 0.5f, 0.0f);
         glUniformMatrix4fv(program.uniform("modelMatrix"), 1, GL_FALSE, glm::value_ptr(modelMatrix));
         glUniformMatrix4fv(program.uniform("viewMatrix"), 1, GL_FALSE, glm::value_ptr(viewMatrix));
         glUniformMatrix4fv(program.uniform("projMatrix"), 1, GL_FALSE, glm::value_ptr(projMatrix));
 
-
-        // Clear the framebuffer
-        glClearColor(0.5f, 0.5f, 0.5f, 1.0f);
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
         // Enable depth test
         glEnable(GL_DEPTH_TEST);
         glEnable(GL_CULL_FACE);
-//        glCullFace(GL_BACK);
+        glCullFace(GL_BACK);
 
         // Draw globe
         //glDrawArrays(GL_TRIANGLES, 0, V.size());
@@ -704,12 +708,9 @@ int main(void)
 
         // Render to the screen
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
         // Render on the whole framebuffer, complete from the lower left corner to the upper right
-      //  glViewport(0,0,windowWidth,windowHeight);
-
-
-        // Clear the screen
-        glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        //  glViewport(0,0,windowWidth,windowHeight);
 
         quadProgram.bind();
         quadProgram.bindVertexAttribArray("quadPosition", FBO);
