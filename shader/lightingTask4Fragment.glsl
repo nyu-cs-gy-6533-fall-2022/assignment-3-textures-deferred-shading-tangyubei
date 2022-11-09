@@ -31,21 +31,20 @@ void main()
         tex * max(0.0, dot(normal, lightDir)) +
         vec3(1.0) * pow(max(0.0, dot(normalize(camPos - pos), normalize(reflect(-lightDir, normal)))), 50.0f),
                          0.0, 1.0);
-    float g = Sobel_filter();
-//
-//    if (g > 0.02) {
-//        //outQuadColor = vec4(0.0f, 100.0/255.0f, 100.0/255.0f, 1.0f);
-//        outQuadColor = vec4(0.0f, 0.0f, 0.0f, 1.0f);
-//    }
-//    else if (texture(gColor, uv) == vec4(0.0, 0.0, 0.0, 0.5f)) {
-//        outQuadColor = vec4(0.5f, 0.5f, 0.5f, 1.0f);
-//    }
-//    else {
-//        outQuadColor = vec4(col, 1.0f);
-//    }
 
-  //  outQuadColor = vec4(linearizedDepth/far, linearizedDepth/far, linearizedDepth/far, 1.0f);
-    outQuadColor = vec4(linearizeDepth(depth.r), linearizeDepth(depth.r), linearizeDepth(depth.r), 1.0f);
+    float g = Sobel_filter();
+
+    if (g > 0.02) {
+        //outQuadColor = vec4(0.0f, 100.0/255.0f, 100.0/255.0f, 1.0f);
+        outQuadColor = vec4(0.0f, 0.0f, 0.0f, 1.0f);
+    }
+    else if (texture(gColor, uv) == vec4(0.0, 0.0, 0.0, 0.5f)) {
+        outQuadColor = vec4(0.5f, 0.5f, 0.5f, 1.0f);
+    }
+    else {
+        outQuadColor = vec4(col, 1.0f);
+    }
+  // outQuadColor = vec4(linearizeDepth(depth.r), linearizeDepth(depth.r), linearizeDepth(depth.r), 1.0f);
 }
 
 float Sobel_filter() {

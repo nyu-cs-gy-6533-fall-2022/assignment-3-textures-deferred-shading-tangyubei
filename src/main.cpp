@@ -1,6 +1,6 @@
 // This example is heavily based on the tutorial at https://open.gl
 
-int task = 2;
+int task = 1;
 // OpenGL Helpers to reduce the clutter
 #include "Helpers.h"
 
@@ -516,8 +516,8 @@ int main(void)
     Program program;
     std::string fragPath;
     std::string vertPath;
-            fragPath = "../shader/fragment.glsl";
-            vertPath = "../shader/vertex.glsl";
+    fragPath = "../shader/fragment.glsl";
+    vertPath = "../shader/vertex.glsl";
 
     // load fragment shader file
     std::ifstream fragShaderFile(fragPath);
@@ -545,74 +545,74 @@ int main(void)
     GLuint renderedTexture;
 
     if (task == 2) {
-            // But on MacOS X with a retina screen it'll be 1024*2 and 768*2, so we get the actual framebuffer size:
-            glfwGetFramebufferSize(window, &windowWidth, &windowHeight);
+        // But on MacOS X with a retina screen it'll be 1024*2 and 768*2, so we get the actual framebuffer size:
+        glfwGetFramebufferSize(window, &windowWidth, &windowHeight);
 
-            // The framebuffer, which regroups 0, 1, or more textures, and 0 or 1 depth buffer.
-            glGenFramebuffers(1, &FramebufferName);
-            glBindFramebuffer(GL_FRAMEBUFFER, FramebufferName);
+        // The framebuffer, which regroups 0, 1, or more textures, and 0 or 1 depth buffer.
+        glGenFramebuffers(1, &FramebufferName);
+        glBindFramebuffer(GL_FRAMEBUFFER, FramebufferName);
 
-            // The texture we're going to render to
-            //GLuint renderedTexture;
-            glGenTextures(1, &renderedTexture);
+        // The texture we're going to render to
+        //GLuint renderedTexture;
+        glGenTextures(1, &renderedTexture);
 
-            // "Bind" the newly created texture : all future texture functions will modify this texture
-            glBindTexture(GL_TEXTURE_2D, renderedTexture);
+        // "Bind" the newly created texture : all future texture functions will modify this texture
+        glBindTexture(GL_TEXTURE_2D, renderedTexture);
 
-            // Give an empty image to OpenGL ( the last "0" means "empty" )
-            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, windowWidth, windowHeight, 0, GL_RGB, GL_UNSIGNED_BYTE, 0);
+        // Give an empty image to OpenGL ( the last "0" means "empty" )
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, windowWidth, windowHeight, 0, GL_RGB, GL_UNSIGNED_BYTE, 0);
 
-            // Poor filtering
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+        // Poor filtering
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
-            // The depth buffer
-            GLuint depthrenderbuffer;
-            glGenRenderbuffers(1, &depthrenderbuffer);
-            glBindRenderbuffer(GL_RENDERBUFFER, depthrenderbuffer);
-            glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, windowWidth, windowHeight);
-            glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, depthrenderbuffer);
+        // The depth buffer
+        GLuint depthrenderbuffer;
+        glGenRenderbuffers(1, &depthrenderbuffer);
+        glBindRenderbuffer(GL_RENDERBUFFER, depthrenderbuffer);
+        glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, windowWidth, windowHeight);
+        glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, depthrenderbuffer);
 
-            // Set "renderedTexture" as our colour attachement #0
-            glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, renderedTexture, 0);
+        // Set "renderedTexture" as our colour attachement #0
+        glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, renderedTexture, 0);
 
-            // Set the list of draw buffers.
-            GLenum DrawBuffers[1] = {GL_COLOR_ATTACHMENT0};
-            glDrawBuffers(1, DrawBuffers); // "1" is the size of DrawBuffers
+        // Set the list of draw buffers.
+        GLenum DrawBuffers[1] = {GL_COLOR_ATTACHMENT0};
+        glDrawBuffers(1, DrawBuffers); // "1" is the size of DrawBuffers
 
-            // Always check that our framebuffer is ok
-            if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
-                return false;
+        // Always check that our framebuffer is ok
+        if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
+            return false;
 
-            std::vector<glm::vec3> quad_buffer_data;
-            quad_buffer_data.resize(0);
-            quad_buffer_data.push_back(glm::vec3(-1.0f, -1.0f, 0.0f));
-            quad_buffer_data.push_back(glm::vec3(1.0f, -1.0f, 0.0f));
-            quad_buffer_data.push_back(glm::vec3(-1.0f, 1.0f, 0.0f));
-            quad_buffer_data.push_back(glm::vec3(-1.0f, 1.0f, 0.0f));
-            quad_buffer_data.push_back(glm::vec3(1.0f, -1.0f, 0.0f));
-            quad_buffer_data.push_back(glm::vec3(1.0f, 1.0f, 0.0f));
-            FBO.init();
-            FBO.update(quad_buffer_data);
+        std::vector<glm::vec3> quad_buffer_data;
+        quad_buffer_data.resize(0);
+        quad_buffer_data.push_back(glm::vec3(-1.0f, -1.0f, 0.0f));
+        quad_buffer_data.push_back(glm::vec3(1.0f, -1.0f, 0.0f));
+        quad_buffer_data.push_back(glm::vec3(-1.0f, 1.0f, 0.0f));
+        quad_buffer_data.push_back(glm::vec3(-1.0f, 1.0f, 0.0f));
+        quad_buffer_data.push_back(glm::vec3(1.0f, -1.0f, 0.0f));
+        quad_buffer_data.push_back(glm::vec3(1.0f, 1.0f, 0.0f));
+        FBO.init();
+        FBO.update(quad_buffer_data);
 
-            //   Program quadProgram;
-            // load fragment shader file
-            std::ifstream rtFragShaderFile("../shader/rtfragment.glsl");
-            std::stringstream rtfragCode;
-            rtfragCode << rtFragShaderFile.rdbuf();
-            // load vertex shader file
-            std::ifstream rtVertShaderFile("../shader/rtvertex.glsl");
-            std::stringstream rtvertCode;
-            rtvertCode << rtVertShaderFile.rdbuf();
-            // Compile the two shaders and upload the binary to the GPU
-            quadProgram.init(rtvertCode.str(), rtfragCode.str());
-            quadProgram.bind();
+        //   Program quadProgram;
+        // load fragment shader file
+        std::ifstream rtFragShaderFile("../shader/rtfragment.glsl");
+        std::stringstream rtfragCode;
+        rtfragCode << rtFragShaderFile.rdbuf();
+        // load vertex shader file
+        std::ifstream rtVertShaderFile("../shader/rtvertex.glsl");
+        std::stringstream rtvertCode;
+        rtvertCode << rtVertShaderFile.rdbuf();
+        // Compile the two shaders and upload the binary to the GPU
+        quadProgram.init(rtvertCode.str(), rtfragCode.str());
+        quadProgram.bind();
 
-            //glBindTexture(GL_TEXTURE_2D, renderedTexture);
-            // quadProgram.bindVertexAttribArray("quadPosition", FBO);
-            GLuint texID = glGetUniformLocation(quadProgram.program_shader, "renderedTexture");
+        //glBindTexture(GL_TEXTURE_2D, renderedTexture);
+        // quadProgram.bindVertexAttribArray("quadPosition", FBO);
+        GLuint texID = glGetUniformLocation(quadProgram.program_shader, "renderedTexture");
     }
     // Register the keyboard callbackx
     glfwSetKeyCallback(window, key_callback);
@@ -638,9 +638,9 @@ int main(void)
         glfwGetWindowSize(window, &width, &height);
 
         if (task == 2) {
-                // Render to the framebuffer with texture attached
-                glBindFramebuffer(GL_FRAMEBUFFER, FramebufferName);
-                glViewport(0,0,windowWidth,windowHeight); // Render on the whole framebuffer, complete from the lower left corner to the upper right
+            // Render to the framebuffer with texture attached
+            glBindFramebuffer(GL_FRAMEBUFFER, FramebufferName);
+            glViewport(0,0,windowWidth,windowHeight); // Render on the whole framebuffer, complete from the lower left corner to the upper right
         }
         // matrix calculations
         viewMatrix = glm::lookAt(cameraPos, cameraTarget, cameraUp);
@@ -692,24 +692,24 @@ int main(void)
 
         if (task == 2) {
 
-                // Render to the screen
-                glBindFramebuffer(GL_FRAMEBUFFER, 0);
-                // Render on the whole framebuffer, complete from the lower left corner to the upper right
-                glViewport(0,0,windowWidth,windowHeight);
+            // Render to the screen
+            glBindFramebuffer(GL_FRAMEBUFFER, 0);
+            // Render on the whole framebuffer, complete from the lower left corner to the upper right
+            glViewport(0,0,windowWidth,windowHeight);
 
-                // Clear the screen
-                glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+            // Clear the screen
+            glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-                quadProgram.bind();
-                quadProgram.bindVertexAttribArray("quadPosition", FBO);
-                // Set active texture to quad texture
-                glActiveTexture(GL_TEXTURE0);
-                glBindTexture(GL_TEXTURE_2D, renderedTexture);
-                // Set our "renderedTexture" sampler to use Texture Unit 0
-                glUniform1i(program.uniform("renderedTexture"), 0);
+            quadProgram.bind();
+            quadProgram.bindVertexAttribArray("quadPosition", FBO);
+            // Set active texture to quad texture
+            glActiveTexture(GL_TEXTURE0);
+            glBindTexture(GL_TEXTURE_2D, renderedTexture);
+            // Set our "renderedTexture" sampler to use Texture Unit 0
+            glUniform1i(program.uniform("renderedTexture"), 0);
 
-                // Draw quads, 6 vertices for 2 triangles
-                glDrawArrays(GL_TRIANGLES, 0, 6);
+            // Draw quads, 6 vertices for 2 triangles
+            glDrawArrays(GL_TRIANGLES, 0, 6);
 
         }
         // Swap front and back buffers
@@ -727,8 +727,8 @@ int main(void)
     NBO.free();
     TBO.free();
     if (task == 2) {
-            quadProgram.free();
-            FBO.free();
+        quadProgram.free();
+        FBO.free();
     }
 
     // Deallocate glfw internals
