@@ -14,6 +14,7 @@ uniform sampler2D gColor;
 uniform sampler2D gDepth;
 
 float Sobel_filter();
+float linearizeDepth(float depth);
 
 void main()
 {
@@ -25,29 +26,26 @@ void main()
     vec3 normal = normalize(n);
     vec3 lightDir = normalize(lightPos - pos);
     vec3 col = tex;
-    if (depth.x > 0.51) {
+    float linearizedDepth = linearizeDepth(depth.r);
         col = clamp(tex * lightParams.x +
         tex * max(0.0, dot(normal, lightDir)) +
         vec3(1.0) * pow(max(0.0, dot(normalize(camPos - pos), normalize(reflect(-lightDir, normal)))), 50.0f),
                          0.0, 1.0);
-    }
     float g = Sobel_filter();
-
+//
 //    if (g > 0.02) {
-//        outQuadColor = vec4(0.0f, 100.0/255.0f, 100.0/255.0f, 1.0f);
+//        //outQuadColor = vec4(0.0f, 100.0/255.0f, 100.0/255.0f, 1.0f);
+//        outQuadColor = vec4(0.0f, 0.0f, 0.0f, 1.0f);
+//    }
+//    else if (texture(gColor, uv) == vec4(0.0, 0.0, 0.0, 0.5f)) {
+//        outQuadColor = vec4(0.5f, 0.5f, 0.5f, 1.0f);
 //    }
 //    else {
 //        outQuadColor = vec4(col, 1.0f);
 //    }
 
-    float z = depth.r * 2.0 - 1.0;
-
-    float near = 0.1f;
-    float far  = 1.0f;
-
-    float linearizedDepth = (2.0 * near * far) / (far + near - z * (far - near));
   //  outQuadColor = vec4(linearizedDepth/far, linearizedDepth/far, linearizedDepth/far, 1.0f);
-    outQuadColor = vec4(col, 1.0f);
+    outQuadColor = vec4(linearizeDepth(depth.r), linearizeDepth(depth.r), linearizeDepth(depth.r), 1.0f);
 }
 
 float Sobel_filter() {
@@ -59,8 +57,9 @@ float Sobel_filter() {
     mat3 I;
     for (int i=0; i<3; i++) {
         for (int j=0; j<3; j++) {
-            float depth = texture(gDepth, uv + vec2(i-1, j-1)/1000).z;
-            I[i][j] = depth;
+            float depth = texture(gDepth, uv + vec2(i-1, j-1)/1000).r;
+            float linearizedDepth = linearizeDepth(depth);
+            I[i][j] = linearizedDepth;
         }
     }
 
@@ -70,4 +69,14 @@ float Sobel_filter() {
     float G = sqrt(pow(G_x, 2.0f)+pow(G_y, 2.0f));
 
     return G;
+}
+
+float linearizeDepth(float depth) {
+    float z = depth * 2.0 - 1.0;
+
+    float near = 0.1f;
+    float far  = 1.0f;
+
+    float linearizedDepth = (2.0 * near * far) / (far + near - z * (far - near));
+    return linearizedDepth/far;
 }
