@@ -3,7 +3,7 @@
 out vec4 gPosition;
 out vec4 gNormal;
 out vec4 gColor;
-out vec4 gDepth;
+//out vec4 gDepth;
 
 in vec3 pos;
 in vec3 n;
@@ -34,5 +34,5 @@ void main()
     float far  = 1.0f;
 
     float depth = (2.0 * near * far) / (far + near - z * (far - near));
-    gDepth = vec4(vec3(depth/far), 1.0f);
+   // gDepth = vec4(vec3(depth/far), 1.0f);
 }

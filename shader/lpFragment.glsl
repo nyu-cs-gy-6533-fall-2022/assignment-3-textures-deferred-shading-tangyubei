@@ -33,12 +33,21 @@ void main()
     }
     float g = Sobel_filter();
 
-    if (g > 0.02) {
-        outQuadColor = vec4(0.0f, 100.0/255.0f, 100.0/255.0f, 1.0f);
-    }
-    else {
-        outQuadColor = vec4(col, 1.0f);
-    }
+//    if (g > 0.02) {
+//        outQuadColor = vec4(0.0f, 100.0/255.0f, 100.0/255.0f, 1.0f);
+//    }
+//    else {
+//        outQuadColor = vec4(col, 1.0f);
+//    }
+
+    float z = depth.r * 2.0 - 1.0;
+
+    float near = 0.1f;
+    float far  = 1.0f;
+
+    float linearizedDepth = (2.0 * near * far) / (far + near - z * (far - near));
+  //  outQuadColor = vec4(linearizedDepth/far, linearizedDepth/far, linearizedDepth/far, 1.0f);
+    outQuadColor = vec4(col, 1.0f);
 }
 
 float Sobel_filter() {
