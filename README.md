@@ -16,7 +16,7 @@ Below is the wireframe of the quads being rendered to screen, as well as the uv 
 <img width="800" alt="Screen Shot 2022-11-06 at 3 02 06 PM" src="https://user-images.githubusercontent.com/34821850/200192376-98037241-1da8-48bb-9735-7ab5b6637733.png">
 
 ## Task 3
-Below is the position mapping, texture mapping, and depth mapping. Position and normal textures had the same results. The near and far values for depth mapping were 0.1 and 30.0f.
+Below is the position mapping, texture mapping, and depth mapping. Position and normal textures had the same results. The near and far values for depth mapping were 0.1 and 30.0f. For this part of the homework, I used this [tutorial] (https://learnopengl.com/Advanced-Lighting/Deferred-Shading) from Learn OpenGL as a reference.
 <img width="796" alt="Screen Shot 2022-11-07 at 3 21 40 PM" src="https://user-images.githubusercontent.com/34821850/200407764-17f274a1-5218-42d2-89c0-90106ddd006a.png">
 <img width="801" alt="Screen Shot 2022-11-07 at 3 22 00 PM" src="https://user-images.githubusercontent.com/34821850/200407773-ce6f149b-9f3f-42f1-96a3-cef39321ec35.png">
 <img width="798" alt="Screen Shot 2022-11-07 at 3 21 23 PM" src="https://user-images.githubusercontent.com/34821850/200407785-9fbac498-694d-4f27-bd64-b0d979cc09c1.png">
