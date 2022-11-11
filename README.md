@@ -23,6 +23,7 @@ Below is the position mapping, texture mapping, and depth mapping. Position and 
 <img width="798" alt="Screen Shot 2022-11-07 at 3 21 23 PM" src="https://user-images.githubusercontent.com/34821850/200407785-9fbac498-694d-4f27-bd64-b0d979cc09c1.png">
 
 ## Task 4
-I used a Sobel filter to detect edges and output a line if the result of the convolution was over a certain threshold. Below is the dragon outlined in cyan.
+I used a Sobel filter to detect edges and output a line if the result of the convolution was over a certain threshold. Below is the dragon outlined in black.
+<img width="798" alt="Screen Shot 2022-11-10 at 10 47 02 PM" src="https://user-images.githubusercontent.com/34821850/201259067-85edcc7c-6c57-4da2-bc14-690c3472f3a0.png">
+<img width="799" alt="Screen Shot 2022-11-10 at 10 47 52 PM" src="https://user-images.githubusercontent.com/34821850/201259083-f109f83c-114e-4186-ad83-a4119a7b9f5a.png">
 
-<img width="797" alt="Screen Shot 2022-11-08 at 6 44 10 PM" src="https://user-images.githubusercontent.com/34821850/200700431-2cbe8082-9dd9-40d4-810f-441fe9fee97e.png">
