@@ -23,7 +23,7 @@ void main()
     vec3 tex = vec3(texture(gColor, uv));
     vec3 depth = vec3(texture(gDepth, uv));
 
-    vec3 normal = normalize(n);
+    vec3 normal = n;
     vec3 lightDir = normalize(lightPos - pos);
     vec3 col = vec3(1.0f, 0.5f, 0.0f);
     float linearizedDepth = linearizeDepth(depth.r);
@@ -32,7 +32,7 @@ void main()
     float g = Sobel_filter();
 
     outQuadColor = vec4(col-g, 1.0f);
-     if (tex == vec3(0.0f, 0.0f, 0.0f)) {
+     if (n == vec3(0.0f, 0.0f, 0.0f)) {
         outQuadColor = vec4(0.5f, 0.5f, 0.5f, 1.0f);
          return;
     }

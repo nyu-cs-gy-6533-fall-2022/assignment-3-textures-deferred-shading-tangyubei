@@ -436,7 +436,7 @@ int main(void)
     glm::mat4 modelMatrix = glm::mat4(1.0f);
 
     // 1: generate sphere, 0: load OFF model
-#if 1
+#if 0
     // generate sphere (radius, #sectors, #stacks, vertices, normals, triangle indices, texture coordinates)
     sphere(1.0f, 36, 18, V, VN, T, VT);
     VBO.update(V);
@@ -448,7 +448,7 @@ int main(void)
     ImageRGB image;
     bool imageAvailable = loadPPM(image, "../data/land_shallow_topo_2048.ppm");
 
-    unsigned int texture;
+     unsigned int texture;
     glGenTextures(1, &texture);
     glBindTexture(GL_TEXTURE_2D, texture);
 // set the texture wrapping/filtering options (on the currently bound texture object)
@@ -516,7 +516,7 @@ int main(void)
     Program program;
     std::string fragPath;
     std::string vertPath;
-    fragPath = "../shader/geometryFragment.glsl";
+    fragPath = "../shader/geometryTask4Fragment.glsl";
     vertPath = "../shader/geometryVertex.glsl";
 
     // load fragment shader file
@@ -527,14 +527,11 @@ int main(void)
     std::ifstream vertShaderFile(vertPath);
     std::stringstream vertCode;
     vertCode << vertShaderFile.rdbuf();
-    // Compile the two shaders and upload the binary to the GPU
-    // Note that we have to explicitly specify that the output "slot" called outColor
-    // is the one that we want in the fragment buffer (and thus on screen)
+
     program.init(vertCode.str(), fragCode.str());
     glBindFragDataLocation(	program.program_shader,0,"gPosition");
     glBindFragDataLocation(	program.program_shader,1,"gNormal");
     glBindFragDataLocation(	program.program_shader,2,"gColor");
-    //   glBindFragDataLocation(	program.program_shader,3,"gDepth");
     program.bind();
 
     // Define some variables out of scope of the switch statement
@@ -544,15 +541,13 @@ int main(void)
     Program quadProgram;
     GLuint gPosition, gNormal, gColor, gDepth;
 
-    // But on MacOS X with a retina screen it'll be 1024*2 and 768*2, so we get the actual framebuffer size:
     glfwGetFramebufferSize(window, &windowWidth, &windowHeight);
 
-    // The framebuffer, which regroups 0, 1, or more textures, and 0 or 1 depth buffer.
+    // The framebuffer
     glGenFramebuffers(1, &FramebufferName);
     glBindFramebuffer(GL_FRAMEBUFFER, FramebufferName);
 
-    // The texture we're going to render to
-    //GLuint renderedTexture;
+    // Set up textures for position, normal, color and depth
     glGenTextures(1, &gPosition);
     glBindTexture(GL_TEXTURE_2D, gPosition);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, windowWidth, windowHeight, 0, GL_RGBA, GL_FLOAT, NULL);
@@ -567,21 +562,12 @@ int main(void)
 
     glGenTextures(1, &gColor);
     glBindTexture(GL_TEXTURE_2D, gColor);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, windowWidth, windowHeight, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, windowWidth, windowHeight, 0, GL_RGBA, GL_FLOAT, NULL);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
-//    glGenTextures(1, &gDepth);
-//    glBindTexture(GL_TEXTURE_2D, gDepth);
-//    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, windowWidth, windowHeight, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
-//    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-//    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-//    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-//    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-
-    // Alternative : Depth texture. Slower, but you can sample it later in your shader
     glGenTextures(1, &gDepth);
     glBindTexture(GL_TEXTURE_2D, gDepth);
     glTexImage2D(GL_TEXTURE_2D, 0,GL_DEPTH_COMPONENT24, windowWidth, windowHeight, 0,GL_DEPTH_COMPONENT, GL_FLOAT, 0);
@@ -591,29 +577,15 @@ int main(void)
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
 
-    // Set "renderedTexture" as our colour attachement #0
+    // Set textures to attachments
     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, gPosition, 0);
     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D, gNormal, 0);
     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT2, GL_TEXTURE_2D, gColor, 0);
-//    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT3, GL_TEXTURE_2D, gDepth, 0);
     glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, gDepth, 0);
 
     // Set the list of draw buffers.
-//    GLenum attachments[4] = {GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2, GL_COLOR_ATTACHMENT3};
-//    glDrawBuffers(4, attachments); // "1" is the size of DrawBuffers
-    GLenum attachments[3] = {GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2};
+    GLenum attachments[3] = {GL_COLOR_ATTACHMENT2, GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1};
     glDrawBuffers(3, attachments);
-
-//    // create and attach depth buffer (renderbuffer)
-//    unsigned int rboDepth;
-//    glGenRenderbuffers(1, &rboDepth);
-//    glBindRenderbuffer(GL_RENDERBUFFER, rboDepth);
-//    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, windowWidth, windowHeight);
-//    glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, rboDepth);
-//    // finally check if framebuffer is complete
-//    if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
-//        std::cout << "Framebuffer not complete!" << std::endl;
-//    glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
     std::vector<glm::vec3> quad_buffer_data;
     quad_buffer_data.resize(0);
@@ -628,7 +600,7 @@ int main(void)
 
     //   Program quadProgram;
     // load fragment shader file
-    std::ifstream rtFragShaderFile("../shader/lightingFragment.glsl");
+    std::ifstream rtFragShaderFile("../shader/lightingTask4Fragment.glsl");
     std::stringstream rtfragCode;
     rtfragCode << rtFragShaderFile.rdbuf();
     // load vertex shader file
@@ -643,9 +615,9 @@ int main(void)
 
     // For sphere, change position to 2,1 for rabbit change to 1,2
     // float vs integer
-    glUniform1i(glGetUniformLocation(quadProgram.program_shader, "gPosition"), 2);
+    glUniform1i(glGetUniformLocation(quadProgram.program_shader, "gPosition"), 0);
     glUniform1i(glGetUniformLocation(quadProgram.program_shader, "gNormal"), 1);
-    glUniform1i(glGetUniformLocation(quadProgram.program_shader, "gColor"), 0);
+    glUniform1i(glGetUniformLocation(quadProgram.program_shader, "gColor"), 2);
     glUniform1i(glGetUniformLocation(quadProgram.program_shader, "gDepth"), 3);
 
     // Register the keyboard callbackx
@@ -667,16 +639,19 @@ int main(void)
     // Loop until the user closes the window
     while (!glfwWindowShouldClose(window))
     {
+        // Enable depth test
+        glEnable(GL_DEPTH_TEST);
+        glEnable(GL_CULL_FACE);
+        glCullFace(GL_BACK);
+
         // Get the size of the window
         int width, height;
         glfwGetWindowSize(window, &width, &height);
 
-
-        // render
-        // ------
+        // Geometry pass
+        // ------------------------------------------------------------------------------
         glClearColor(0.0f, 0.0f, 0.0f, 0.5f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-        glDisable(GL_BLEND);
 
         // Render to the framebuffer with texture attached
         glBindFramebuffer(GL_FRAMEBUFFER, FramebufferName);
@@ -699,30 +674,25 @@ int main(void)
         // Set the uniform values
         // Set active texture to map
 //
-        glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_2D, texture);
+//        glActiveTexture(GL_TEXTURE0);
+//        glBindTexture(GL_TEXTURE_2D, texture);
         program.bindVertexAttribArray("position", VBO);
         program.bindVertexAttribArray("normal", NBO);
-        program.bindVertexAttribArray("aTexCoord", TBO);
-        glUniform1i(program.uniform("ourTexture"), 0);
+        //  program.bindVertexAttribArray("aTexCoord", TBO);
+//        glUniform1i(program.uniform("ourTexture"), 0);
         glUniform3f(program.uniform("triangleColor"), 1.0f, 0.5f, 0.0f);
         glUniformMatrix4fv(program.uniform("modelMatrix"), 1, GL_FALSE, glm::value_ptr(modelMatrix));
         glUniformMatrix4fv(program.uniform("viewMatrix"), 1, GL_FALSE, glm::value_ptr(viewMatrix));
         glUniformMatrix4fv(program.uniform("projMatrix"), 1, GL_FALSE, glm::value_ptr(projMatrix));
 
-        // Enable depth test
-        glEnable(GL_DEPTH_TEST);
-        glEnable(GL_CULL_FACE);
-        glCullFace(GL_BACK);
-
         // Draw globe
         //glDrawArrays(GL_TRIANGLES, 0, V.size());
         glDrawElements(GL_TRIANGLES, T.size() * 3, GL_UNSIGNED_INT, 0);
 
+        // Lighting pass
+        // ------------------------------------------------------------------------------
         // Render to the screen
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
-        // Render on the whole framebuffer, complete from the lower left corner to the upper right
-        glViewport(0,0,windowWidth,windowHeight);
 
         quadProgram.bind();
         quadProgram.bindVertexAttribArray("quadPosition", FBO);
