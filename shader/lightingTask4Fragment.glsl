@@ -25,25 +25,20 @@ void main()
 
     vec3 normal = normalize(n);
     vec3 lightDir = normalize(lightPos - pos);
-    vec3 col = tex;
+    vec3 col = vec3(1.0f, 0.5f, 0.0f);
     float linearizedDepth = linearizeDepth(depth.r);
-        col = clamp(tex * lightParams.x +
-        tex * max(0.0, dot(normal, lightDir)) +
-        vec3(1.0) * pow(max(0.0, dot(normalize(camPos - pos), normalize(reflect(-lightDir, normal)))), 50.0f),
-                         0.0, 1.0);
+    col = clamp(tex * lightParams.x + tex * max(0.0, dot(normal, lightDir)) + vec3(1.0) * pow(max(0.0, dot(normalize((camPos) - pos), normalize(reflect(-lightDir, normal)))), 50.0f), 0.0, 1.0);
 
     float g = Sobel_filter();
 
-    if (g > 0.02) {
-        //outQuadColor = vec4(0.0f, 100.0/255.0f, 100.0/255.0f, 1.0f);
-        outQuadColor = vec4(0.0f, 0.0f, 0.0f, 1.0f);
-    }
-    else if (texture(gColor, uv) == vec4(0.0, 0.0, 0.0, 0.5f)) {
+    outQuadColor = vec4(col-g, 1.0f);
+     if (tex == vec3(0.0f, 0.0f, 0.0f)) {
         outQuadColor = vec4(0.5f, 0.5f, 0.5f, 1.0f);
+         return;
     }
-    else {
-        outQuadColor = vec4(col, 1.0f);
-    }
+//    else {
+//        outQuadColor = vec4(col, 1.0f);
+//    }
   // outQuadColor = vec4(linearizeDepth(depth.r), linearizeDepth(depth.r), linearizeDepth(depth.r), 1.0f);
 }
 
@@ -56,7 +51,7 @@ float Sobel_filter() {
     mat3 I;
     for (int i=0; i<3; i++) {
         for (int j=0; j<3; j++) {
-            float depth = texture(gDepth, uv + vec2(i-1, j-1)/1000).r;
+            float depth = texture(gDepth, uv + vec2(i-1, j-1)/500).r;
             float linearizedDepth = linearizeDepth(depth);
             I[i][j] = linearizedDepth;
         }
