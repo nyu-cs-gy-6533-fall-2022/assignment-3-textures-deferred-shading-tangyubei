@@ -14,7 +14,7 @@ Below is the wireframe of the quads being rendered to screen, as well as the uv 
 <img width="800" alt="Screen Shot 2022-11-06 at 3 02 06 PM" src="https://user-images.githubusercontent.com/34821850/200192376-98037241-1da8-48bb-9735-7ab5b6637733.png">
 
 ## Task 3
-Below is the position mapping, texture mapping, and depth mapping. Position and normal textures had the same results. The near and far values for depth mapping were 0.1 and 30.0f. For this part of the homework, I used this [tutorial] (https://learnopengl.com/Advanced-Lighting/Deferred-Shading) from Learn OpenGL as a reference.
+Below is the position mapping, texture mapping, and depth mapping. Position and normal textures had the same results, because for a sphere with radius one, position and normals are the same. The near and far values for depth mapping were set to 0.1 and 30.0f for better visibility. For this part of the homework, I used this [tutorial] (https://learnopengl.com/Advanced-Lighting/Deferred-Shading) from Learn OpenGL as a reference.
 
 <img width="802" alt="Screen Shot 2022-11-10 at 10 43 10 PM" src="https://user-images.githubusercontent.com/34821850/201258359-176d4936-e4d7-4ed6-bb29-40e54cb6b522.png">
 
